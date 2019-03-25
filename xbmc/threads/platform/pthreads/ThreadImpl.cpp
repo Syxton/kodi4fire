@@ -227,7 +227,7 @@ int CThread::GetPriority()
 bool CThread::WaitForThreadExit(unsigned int milliseconds)
 {
   bool bReturn = m_TermEvent.WaitMSec(milliseconds);
-
+  CSingleLock lock(m_CriticalSection);
   return bReturn;
 }
 

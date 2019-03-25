@@ -20,7 +20,7 @@
 
 #version 100
 
-precision highp float;
+precision mediump float;
 uniform sampler2D m_sampY;
 uniform sampler2D m_sampU;
 uniform sampler2D m_sampV;
@@ -83,9 +83,27 @@ void main()
   rgb = mix(rgb, rgbBelow, 0.5);
 
 #if defined(XBMC_COL_CONVERSION)
-  rgb.rgb = pow(max(vec3(0), rgb.rgb), vec3(m_gammaSrc));
+  vec4 tmp;
+  vec4 tmp2;
+  tmp.rgb = max(vec3(0), rgb.rgb);
+  float a = 0.1854;
+  float b = 0.8516;
+  float c = -0.0357;
+  float ai = 0.06981272;
+  float bi = -0.2543179;
+  float ci = 1.18681715;
+#if defined(XBMC_COL_GAMMA_2_4)
+  a = 0.3856;
+  b = 0.6641;
+  c = -0.2034;
+  ai = 0.14334285;
+  bi = -0.50023754;
+  ci = 1.36175809;
+#endif
+  tmp2.rgb = tmp.rgb * tmp.rgb;
+  rgb.rgb = tmp2.rgb * tmp.rgb * a + tmp2.rgb * b + c * tmp.rgb;
   rgb.rgb = max(vec3(0), m_primMat * rgb.rgb);
-  rgb.rgb = pow(rgb.rgb, vec3(m_gammaDstInv));
+  rgb.rgb = ai * rgb.rgb*rgb.rgb + bi * rgb.rgb + ci * sqrt(rgb.rgb);
 
 #if defined(XBMC_TONE_MAPPING)
   float luma = dot(rgb.rgb, m_coefsDst);
